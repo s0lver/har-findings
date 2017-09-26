@@ -14,10 +14,10 @@ def calculate_magnitude_vector(samples: List[AccelerometerSample]):
     return vector
 
 
-def normalize_time(samples: List[AccelerometerSample]):
+def normalize_time(samples: List[AccelerometerSample], factor=1000.0):
     start_time = samples[0].timestamp
 
     for sample in samples:
-        sample.timestamp = (sample.timestamp - start_time) / 1000
+        sample.timestamp = (sample.timestamp - start_time) / factor
 
         # Try it without return :)

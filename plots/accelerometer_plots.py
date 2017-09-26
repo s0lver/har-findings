@@ -30,29 +30,26 @@ def plot_activity_data(samples: List[AccelerometerSample], label, path_to_save=N
 
     xs = list(map(lambda x: x.timestamp, samples))
     ys = list(map(lambda x: x.x, samples))
-    axes[0].plot(xs, ys, label='X axis', linewidth='1')
+    axes[0].plot(ys, label='X axis', linewidth='1')
     axes[0].set_ylabel('Acc (Earth G off)')
     axes[0].legend()
 
     ys = list(map(lambda x: x.y, samples))
-    axes[1].plot(xs, ys, label='Y axis', linewidth='1')
+    axes[1].plot(ys, label='Y axis', linewidth='1')
     axes[1].set_ylabel('Acc (Earth G off)')
     axes[1].legend()
 
     ys = list(map(lambda x: x.z, samples))
-    axes[2].plot(xs, ys, label='Z axis', linewidth='1')
+    axes[2].plot(ys, label='Z axis', linewidth='1')
     axes[2].set_ylabel('Acc (Earth G off)')
     axes[2].legend()
 
     ys = calculate_magnitude_vector(samples)
-    axes[3].plot(xs, ys, label='Magnitude vector', linewidth='1')
+    axes[3].plot(ys, label='Magnitude vector', linewidth='1')
     axes[3].set_ylabel('Magnitude vector')
     axes[3].legend()
 
     axes[3].set_xlabel('Time')
-
-    # plt.tight_layout()
-    # axis.zaxis.labelpad = 15
 
     if path_to_save is not None:
         plt.savefig(path_to_save, format='pdf', bbox_inches='tight')
@@ -200,22 +197,25 @@ def plot_statistics(statistics_static: List[Dict], statistics_walking: List[Dict
     fig = plt.figure()
     axis = fig.gca()
 
+    xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_walking))
+    ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_walking))
+    # axis.scatter(x=xs, y=ys, label='Walking')
+    axis.scatter(x=xs, y=ys, label='V1')
+
+    xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_running))
+    ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_running))
+    # axis.scatter(x=xs, y=ys, label='Running')
+    axis.scatter(x=xs, y=ys, label='V2')
+
+    xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_vehicle))
+    ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_vehicle))
+    # axis.scatter(x=xs, y=ys, label='Vehicle')
+    axis.scatter(x=xs, y=ys, label='V3')
+
     # Plot the static data
     xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_static))
     ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_static))
     axis.scatter(x=xs, y=ys, label='Static')
-
-    xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_walking))
-    ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_walking))
-    axis.scatter(x=xs, y=ys, label='Walking')
-
-    xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_running))
-    ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_running))
-    axis.scatter(x=xs, y=ys, label='Running')
-
-    xs = list(map(lambda x: x[attributes_to_plot[0]], statistics_vehicle))
-    ys = list(map(lambda x: x[attributes_to_plot[1]], statistics_vehicle))
-    axis.scatter(x=xs, y=ys, label='Vehicle')
 
     axis.set_xlabel(attributes_to_plot[0])
     axis.set_ylabel(attributes_to_plot[1])
@@ -251,3 +251,41 @@ def plot_magnitude_vectors(magnitude_vector_lists, activity_strings):
         axis.plot(samples, linewidth='1', label=activity_strings[i])
 
     axis.legend()
+
+
+def plot_magnitude_vectors_per_alpha(magnitude_vector_lists, timestamps, alpha_values, single=False):
+    plt.style.use('bmh')
+
+    plt.rcParams['font.family'] = 'Gotham XNarrow'
+    plt.rcParams['font.serif'] = 'Gotham XNarrow'
+    plt.rcParams['font.monospace'] = 'Monaco'
+    plt.rcParams['font.size'] = 10
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['axes.labelweight'] = 'normal'
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
+    plt.rcParams['legend.fontsize'] = 7
+    plt.rcParams['figure.titlesize'] = 13
+    plt.rcParams['legend.fontsize'] = 9
+
+    # xs = timestamps
+
+    if single:
+        fig = plt.figure()
+        ax = fig.gca()
+        for index in range(0, len(alpha_values)):
+            ys = magnitude_vector_lists[index]
+            ax.plot(ys, label='alpha-{}'.format(alpha_values[index]), linewidth='1')
+            # ax.plot(xs, ys, label='alpha-{}'.format(alpha_values[index]), linewidth='1')
+
+        ax.set_title('mv with respect of alphas')
+        ax.legend()
+
+    else:
+        fig, axes = plt.subplots(len(alpha_values))
+
+        for index in range(0, len(alpha_values)):
+            ys = magnitude_vector_lists[index]
+            axes[index].plot(xs, ys, label='alpha-{}'.format(alpha_values[index]), linewidth='1')
+            axes[index].set_title('alpha {}'.format(alpha_values[index]))

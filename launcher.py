@@ -7,8 +7,8 @@ import numpy as np
 from GravityFilterer import GravityFilterer
 from acc_data_reader import read_csv_acc_samples_file
 from entities.AccelerometerSample import AccelerometerSample
-from plots.accelerometer_plots import plot_activity_data, plot_all_activities_data, plot_statistics, \
-    plot_some_activities_data, plot_magnitude_vectors, plot_magnitude_vectors_per_alpha
+from plots.accelerometer_plots import plot_activity_data, plot_statistics, \
+    plot_magnitude_vectors, plot_magnitude_vectors_per_alpha
 from preprocessing.tools import normalize_time, calculate_magnitude_vector
 
 
@@ -35,15 +35,15 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample]):
     first_window = gravity_free_samples[0].id_window
     last_window = gravity_free_samples[-1].id_window
 
-    for i in range(first_window, last_window):
+    for i in range(first_window, last_window + 1):
         id_window = i
         samples_of_window = list(filter(lambda x: x.id_window == id_window, gravity_free_samples))
 
         mv = np.array(calculate_magnitude_vector(samples_of_window))
 
         # Calculate each of the attributes, gravity has been already filtered
-        mean = np.mean(mv)
-        std_dev = np.std(mv)
+        mean = my_mean(mv)
+        std_dev = my_std_dev(mv, mean)
         median = np.median(mv)
 
         d = {
@@ -54,6 +54,24 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample]):
         statistics.append(d)
 
     return statistics
+
+
+def my_mean(vector):
+    sum = 0.0
+    for v in vector:
+        sum += v
+
+    return sum / float(len(vector))
+
+
+def my_std_dev(mv, mean):
+    sum = 0.0
+    dif = 0.0
+    for v in mv:
+        diff = v - mean
+        sum += (diff ** 2)
+    import math
+    return math.sqrt(sum / float(len(mv)))
 
 
 def show_different_filter_configurations(alpha=0.8):
@@ -315,7 +333,6 @@ def plot_new_values(files, activity_labels):
     plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids)
 
 
-
 if __name__ == '__main__':
     files = [
         'c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv',
@@ -323,7 +340,7 @@ if __name__ == '__main__':
         'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-081037-ui.csv',
         'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-092518-ui.csv',
     ]
-    activity_labels=[
+    activity_labels = [
         'static',
         'vehicle',
         'vehicle',

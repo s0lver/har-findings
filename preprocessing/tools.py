@@ -8,7 +8,8 @@ from entities.AccelerometerSample import AccelerometerSample
 def calculate_magnitude_vector(samples: List[AccelerometerSample]):
     vector = []
     for s in samples:
-        magnitude = math.sqrt((s.x ** 2) + (s.y ** 2) + (s.z ** 2))
+        sum = (s.x ** 2) + (s.y ** 2) + (s.z ** 2)
+        magnitude = math.sqrt(sum)
         vector.append(magnitude)
 
     return vector

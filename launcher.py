@@ -1,77 +1,14 @@
 from pathlib import Path
-from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from GravityFilterer import GravityFilterer
 from acc_data_reader import read_csv_acc_samples_file
 from entities.AccelerometerSample import AccelerometerSample
 from plots.accelerometer_plots import plot_activity_data, plot_statistics, \
-    plot_magnitude_vectors, plot_magnitude_vectors_per_alpha
-from preprocessing.tools import normalize_time, calculate_magnitude_vector
-
-
-def filter_gravity(samples, alpha=0.8):
-    g = GravityFilterer(samples, alpha)
-    g.filter_gravity()
-
-
-def filter_gravity_per_window(samples):
-    first_window = samples[0].id_window
-    last_window = samples[-1].id_window
-
-    for i in range(first_window, last_window):
-        id_window = i
-        samples_of_window = list(filter(lambda x: x.id_window == id_window, samples))
-
-        g = GravityFilterer(samples_of_window)
-        g.filter_gravity()
-
-
-def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample]):
-    statistics = []
-    # List of dicts, each dict a dimension-attribute
-    first_window = gravity_free_samples[0].id_window
-    last_window = gravity_free_samples[-1].id_window
-
-    for i in range(first_window, last_window + 1):
-        id_window = i
-        samples_of_window = list(filter(lambda x: x.id_window == id_window, gravity_free_samples))
-
-        mv = np.array(calculate_magnitude_vector(samples_of_window))
-
-        # Calculate each of the attributes, gravity has been already filtered
-        mean = my_mean(mv)
-        std_dev = my_std_dev(mv, mean)
-        median = np.median(mv)
-
-        d = {
-            "mean": mean,
-            "std_dev": std_dev,
-            "median": median
-        }
-        statistics.append(d)
-
-    return statistics
-
-
-def my_mean(vector):
-    sum = 0.0
-    for v in vector:
-        sum += v
-
-    return sum / float(len(vector))
-
-
-def my_std_dev(mv, mean):
-    sum = 0.0
-    dif = 0.0
-    for v in mv:
-        diff = v - mean
-        sum += (diff ** 2)
-    import math
-    return math.sqrt(sum / float(len(mv)))
+    plot_magnitude_vectors, plot_magnitude_vectors_per_alpha, plot_accelerations_and_mag_vectors, plot_three_dimensions
+from preprocessing.tools import normalize_time, calculate_magnitude_vector, filter_gravity, get_statistics_per_window, \
+    get_ranges, get_average_range_size
 
 
 def show_different_filter_configurations(alpha=0.8):
@@ -131,7 +68,8 @@ def do_work():
     samples_vehicle_5 = read_csv_acc_samples_file(
         'c:\\users/rafael/desktop/vehicle/focus-arena/vehicle-samples-2017-09-20-140314.csv')
 
-    samples_static_1 = read_csv_acc_samples_file('c:\\users/rafael/desktop/static/static-samples-2017-09-20-125440.csv')
+    samples_static_1 = read_csv_acc_samples_file(
+        'c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv')
 
     # filter_gravity_per_window(samples_vehicle_1)
     # filter_gravity_per_window(samples_vehicle_2)
@@ -201,9 +139,10 @@ def do_work():
 
     statistics_ids = ['std_dev', 'mean']
     plot_statistics(statistics_static_1, statistics_vehicle_1, statistics_vehicle_2, statistics_vehicle_3,
-                    statistics_ids)
+                    statistics_ids, ['Static', 'Vehicle 1', 'Vehicle 2', 'Vehicle 3'])
     # plot_statistics(statistics_static, statistics_walking, statistics_running, statistics_vehicle, statistics_ids)
-    plot_statistics(statistics_static_1, [], [], statistics_vehicle_1, statistics_ids)
+    plot_statistics(statistics_static_1, [], [], statistics_vehicle_1, statistics_ids,
+                    ['Static', 'Vehicle 1', 'Vehicle 2', 'Vehicle 3'])
     plt.show()
 
     # top_threshold = 40
@@ -313,25 +252,109 @@ def show_magnitude_vector_per_alpha(alpha_values, file_path):
     plot_magnitude_vectors_per_alpha(vectors, timestamps, alpha_values, single=True)
 
 
-def plot_new_values(files, activity_labels):
+def plot_new_values(files, activity_labels, remove_gravity=True):
     mvs = []
     stats = []
+    i = 0
     for file in files:
+        print('reading {}'.format(file))
         samples = read_csv_acc_samples_file(file)
-        filter_gravity(samples)
-        samples = samples[10:17500]
+        if remove_gravity:
+            filter_gravity(samples)
+            samples = samples[10:17500]
 
         mv = calculate_magnitude_vector(samples)
         mvs.append(mv)
 
-        stat = get_statistics_per_window(samples)
+        stat = get_statistics_per_window(samples, mean_to_add=means_are[i])
         stats.append(stat)
+        i += 1
 
-    plot_magnitude_vectors(mvs, activity_labels)
+    # plot_magnitude_vectors(mvs, activity_labels)
 
-    statistics_ids = ['std_dev', 'mean']
-    plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids)
+    # statistics_ids = ['std_dev', 'acc_range_size']
+    statistics_ids = ['std_dev', 'mean_with_mean']
+    plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids, activity_labels)
 
+    # statistics_ids = ['mean', 'acc_range_size']
+    statistics_ids = ['median', 'mean_with_mean']
+    plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids, activity_labels)
+
+
+def plot_portion_of_data(files, activity_labels, remove_gravity=True):
+    samples_list = []
+    new_start = 20
+    id_window_to_select = 90
+
+    for f in files:
+        samples = read_csv_acc_samples_file(f)
+        if remove_gravity:
+            filter_gravity(samples)
+            samples = samples[new_start:]
+
+        samples = list(filter(lambda x: x.id_window < id_window_to_select, samples))
+        normalize_time(samples)
+
+        samples_list.append(samples)
+
+    plot_accelerations_and_mag_vectors(samples_list, activity_labels)
+
+
+def calculate_global_statistics(files, remove_gravity=True):
+    samples_list = []
+    new_start = 20
+
+    for f in files:
+        samples = read_csv_acc_samples_file(f)
+        if remove_gravity:
+            filter_gravity(samples)
+            samples = samples[new_start:]
+
+        mv = calculate_magnitude_vector(samples)
+        mean_value = np.mean(mv)
+        print('For {} mean is {}'.format(f, mean_value))
+
+
+def analyze_three_dimensions(files, activity_labels):
+    new_start = 20
+    statistics = []
+    i = 0
+    for f in files:
+        samples = read_csv_acc_samples_file(f)
+        filter_gravity(samples)
+        samples = samples[new_start:]
+
+        normalize_time(samples)
+        stats = get_statistics_per_window(samples, mean_to_add=means_are[i])
+        statistics.append(stats)
+        i += 1
+
+    attributes_to_plot = ['mean', 'std_dev', 'avg_range_size_with_mean']
+    plot_three_dimensions(statistics, activity_labels, attributes_to_plot)
+
+
+def different_filter_configurations():
+    show_different_filter_configurations(alpha=0.3)
+    show_different_filter_configurations(alpha=0.5)
+    show_different_filter_configurations(alpha=0.95)
+
+
+def normal_vs_ui():
+    show_normal_vs_ui(normal_file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-20-125440.csv',
+                      ui_file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-21-124838-ui.csv')
+    show_normal_vs_ui(
+        normal_file_path='c:\\users/rafael/desktop/vehicle/focus-arena/vehicle-samples-2017-09-20-131224.csv',
+        ui_file_path='c:\\users/rafael/desktop/vehicle/focus-arena/vehicle-samples-2017-09-21-131545-ui.csv')
+
+
+def magnitude_vectors_vs_alpha():
+    show_magnitude_vector_per_alpha(alpha_values=[0.9, 0.95],
+                                    file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv')
+    show_magnitude_vector_per_alpha(alpha_values=[0.9, 0.95],
+                                    file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv')
+
+
+means_are = [0.09792535164706333, 0.44263381696905124, 0.4642997219313103, 0.52316091488281]
 
 if __name__ == '__main__':
     files = [
@@ -347,23 +370,64 @@ if __name__ == '__main__':
         'vehicle'
     ]
 
-    plot_new_values(files, activity_labels)
+    # calculate_global_statistics(files, remove_gravity=True)
+
+    # files = [
+    #     'data/raw-static.csv',
+    #     'data/raw-walking.csv',
+    #     'data/raw-running.csv',
+    #     'data/raw-vehicle.csv'
+    # ]
+    #
+    # activity_labels = [
+    #     'static',
+    #     'walking',
+    #     'running',
+    #     'vehicle'
+    # ]
+
+    plot_new_values(files, activity_labels, remove_gravity=True)
+
     # do_work()
+    # different_filter_configurations()
+    # normal_vs_ui()
+    # magnitude_vectors_vs_alpha()
 
-    # show_different_filter_configurations(alpha=0.3)
-    # show_different_filter_configurations(alpha=0.5)
-    # show_different_filter_configurations(alpha=0.95)
-
-    # show_normal_vs_ui(normal_file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-20-125440.csv',
-    #                   ui_file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-21-124838-ui.csv')
-    # show_normal_vs_ui(normal_file_path='c:\\users/rafael/desktop/vehicle/focus-arena/vehicle-samples-2017-09-20-131224.csv',
-    #                   ui_file_path='c:\\users/rafael/desktop/vehicle/focus-arena/vehicle-samples-2017-09-21-131545-ui.csv')
-
-    # show_magnitude_vector_per_alpha(alpha_values=[0.9, 0.95],
-    #                                 file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv')
-    # show_magnitude_vector_per_alpha(alpha_values=[0.9, 0.95],
-    #                                 file_path='c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv')
+    # plot_portion_of_data(files, activity_labels)
+    # show_statistics_per_window(files)
+    # analyze_three_dimensions(files, activity_labels)
     plt.show()
 
-    # plot of static normal vs -ui DONE, ALTHOUGH NO MUCH DIFFERENCE IS SEEN
-    # plot of diff mag vecs with diff alpha HERE, THE IDEA IS TO SEE THE VARIATIONS ON MAGNITUDE VECTOR CAUSED BY ALPHA
+    # samples = read_csv_acc_samples_file(files[0])
+    # filter_gravity(samples)
+    # samples = samples[10:17500]
+    #
+    # filtered_samples = list(filter(lambda x: x.id_window==10, samples))
+    # filtered_mvs = calculate_magnitude_vector(filtered_samples)
+    #
+    # # for s in filtered_samples:
+    # #     print(s)
+    # #
+    # # print()
+    # # for v in filtered_mvs:
+    # #     print(v)
+    #
+    # stats = get_statistics_per_window(filtered_samples)
+    # print(stats)
+    #
+    # samples = read_csv_acc_samples_file(files[1])
+    # filter_gravity(samples)
+    # samples = samples[10:17500]
+    #
+    # filtered_samples = list(filter(lambda x: x.id_window == 10, samples))
+    # filtered_mvs = calculate_magnitude_vector(filtered_samples)
+    #
+    # # for s in filtered_samples:
+    # #     print(s)
+    # #
+    # # print()
+    # # for v in filtered_mvs:
+    # #     print(v)
+    #
+    # stats = get_statistics_per_window(filtered_samples)
+    # print(stats)

@@ -84,18 +84,22 @@ def produce_training_configuration(files_for_static, files_for_walking, files_fo
     samples_for_biking = read_samples(files_for_biking)
     samples_for_vehicle = read_samples(files_for_vehicle)
 
-    patterns_static = calculate_patterns(samples_for_static, remove_gravity=False)
-    patterns_walking = calculate_patterns(samples_for_walking, remove_gravity=False)
-    patterns_biking = calculate_patterns(samples_for_biking, remove_gravity=False)
-    patterns_vehicle = calculate_patterns(samples_for_vehicle, remove_gravity=False)
+    # patterns_static = calculate_patterns(samples_for_static, remove_gravity=False)
+    # patterns_walking = calculate_patterns(samples_for_walking, remove_gravity=False)
+    # patterns_biking = calculate_patterns(samples_for_biking, remove_gravity=False)
+    # patterns_vehicle = calculate_patterns(samples_for_vehicle, remove_gravity=False)
+    patterns_static = calculate_patterns(samples_for_static, remove_gravity=True)
+    patterns_walking = calculate_patterns(samples_for_walking, remove_gravity=True)
+    patterns_biking = calculate_patterns(samples_for_biking, remove_gravity=True)
+    patterns_vehicle = calculate_patterns(samples_for_vehicle, remove_gravity=True)
 
     configuration_static = calculate_nb_values_per_window_per_samples_list(patterns_static)
-    configuration_walking = calculate_nb_values_per_window_per_samples_list(patterns_walking)
-    configuration_biking = calculate_nb_values_per_window_per_samples_list(patterns_biking)
+    # configuration_walking = calculate_nb_values_per_window_per_samples_list(patterns_walking)
+    # configuration_biking = calculate_nb_values_per_window_per_samples_list(patterns_biking)
     configuration_vehicle = calculate_nb_values_per_window_per_samples_list(patterns_vehicle)
 
-    # configuration_walking = [[999, 999], [999, 999]]
-    # configuration_biking = [[555, 555], [555, 555]]
+    configuration_walking = [[999, 999], [999, 999]]
+    configuration_biking = [[555, 555], [555, 555]]
 
     output_file_path = 'c:\\users/rafael/desktop/training-configuration.csv'
     write_configuration_file([configuration_static, configuration_walking,
@@ -103,15 +107,15 @@ def produce_training_configuration(files_for_static, files_for_walking, files_fo
 
 
 if __name__ == '__main__':
-    # files_for_static = ['data/static/static-samples-2017-09-21-183652-ui.csv']
-    # files_for_walking = []
-    # files_for_biking = []
-    # files_for_vehicle = ['data/vehicle/vehicle-samples-2017-09-21-214800-ui.csv',
-    #                      'data/vehicle/vehicle-samples-2017-09-22-081037-ui.csv',
-    #                      'data/vehicle/vehicle-samples-2017-09-22-092518-ui.csv']
-    files_for_static = ['data/raw-static.csv']
-    files_for_walking = ['data/raw-walking.csv']
-    files_for_biking = ['data/raw-running.csv']
-    files_for_vehicle = ['data/raw-vehicle.csv']
+    files_for_static = ['data/static/static-samples-2017-09-21-183652-ui.csv']
+    files_for_walking = []
+    files_for_biking = []
+    files_for_vehicle = ['data/vehicle/vehicle-samples-2017-09-21-214800-ui.csv',
+                         'data/vehicle/vehicle-samples-2017-09-22-081037-ui.csv',
+                         'data/vehicle/vehicle-samples-2017-09-22-092518-ui.csv']
+    # files_for_static = ['data/raw-static.csv']
+    # files_for_walking = ['data/raw-walking.csv']
+    # files_for_biking = ['data/raw-running.csv']
+    # files_for_vehicle = ['data/raw-vehicle.csv']
 
     produce_training_configuration(files_for_static, files_for_walking, files_for_biking, files_for_vehicle)

@@ -88,6 +88,14 @@ def get_accumulated_range_size(ranges):
     return sum(sizes)
 
 
+def get_average_max_range(ranges):
+    acc_sum = 0.0
+    for r in ranges:
+        acc_sum += np.max([r[0], r[1]])
+
+    return acc_sum / float(len(ranges))
+
+
 def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], mean_to_add=0.0):
     statistics = []
 
@@ -106,6 +114,7 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], m
         ranges = get_ranges(mv)
         average_range_size = get_average_range_size(ranges)
         accumulated_range_size = get_accumulated_range_size(ranges)
+        average_max_range = get_average_max_range(ranges)
         mean = my_mean(mv)
         mean_with_mean = mean + mean_to_add
         average_range_size_with_mean = average_range_size + mean_to_add
@@ -127,7 +136,8 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], m
             "avg_crossings": sum_crossings / 3.0,
             "avg_range_size": average_range_size,
             "avg_range_size_with_mean": average_range_size_with_mean,
-            "acc_range_size": accumulated_range_size
+            "acc_range_size": accumulated_range_size,
+            "avg_max_range": average_max_range
         }
         statistics.append(d)
 

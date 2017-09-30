@@ -34,36 +34,36 @@ def calculate_patterns(samples_list, remove_gravity=True):
     return all_patterns
 
 
-def calculate_nb_values_per_window_per_samples_list(patterns_list):
-    sum_mean = 0.0
-    sum_standard_deviation = 0.0
+def calculate_nb_values_per_window_per_samples_list(patterns_list, feature_one, feature_two):
+    sum_feature_one = 0.0
+    sum_feature_two = 0.0
     patterns_counter = 0
     laplace_correction = 0.01
 
     # Means
     for patterns in patterns_list:
         for pattern in patterns:
-            sum_mean += pattern["mean"]
-            sum_standard_deviation += pattern["std_dev"]
+            sum_feature_one += pattern[feature_one]
+            sum_feature_two += pattern[feature_two]
             patterns_counter += 1
 
-    mean_of_standard_deviation = (sum_standard_deviation / float(patterns_counter))
-    mean_of_mean = (sum_mean / float(patterns_counter))
+    mean_of_feature_two = (sum_feature_two / float(patterns_counter))
+    mean_of_feature_one = (sum_feature_one / float(patterns_counter))
 
     # Variance
-    accumulated_diff_mean = 0.0
-    accumulated_diff_std_dev = 0.0
+    accumulated_diff_feature_one = 0.0
+    accumulated_diff_feature_two = 0.0
 
     for patterns in patterns_list:
         for pattern in patterns:
-            accumulated_diff_std_dev += (pattern["std_dev"] - mean_of_standard_deviation) ** 2
-            accumulated_diff_mean += (pattern["mean"] - mean_of_mean) ** 2
+            accumulated_diff_feature_two += (pattern[feature_two] - mean_of_feature_two) ** 2
+            accumulated_diff_feature_one += (pattern[feature_one] - mean_of_feature_one) ** 2
 
-    variance_of_std_deviation = (accumulated_diff_std_dev / float(patterns_counter - 1.0))
-    variance_of_mean = (accumulated_diff_mean / float(patterns_counter - 1.0))
+    variance_of_feature_two = (accumulated_diff_feature_two / float(patterns_counter - 1.0))
+    variance_of_feature_one = (accumulated_diff_feature_one / float(patterns_counter - 1.0))
 
-    return [[mean_of_standard_deviation + laplace_correction, mean_of_mean + laplace_correction],
-            [variance_of_std_deviation + laplace_correction, variance_of_mean + laplace_correction]]
+    return [[mean_of_feature_two + laplace_correction, mean_of_feature_one + laplace_correction],
+            [variance_of_feature_two + laplace_correction, variance_of_feature_one + laplace_correction]]
 
 
 def write_configuration_file(configurations_list, file_path):
@@ -93,10 +93,13 @@ def produce_training_configuration(files_for_static, files_for_walking, files_fo
     patterns_biking = calculate_patterns(samples_for_biking, remove_gravity=True)
     patterns_vehicle = calculate_patterns(samples_for_vehicle, remove_gravity=True)
 
-    configuration_static = calculate_nb_values_per_window_per_samples_list(patterns_static)
+    feature_one = "mean"
+    feature_two = "std_dev"
+
+    configuration_static = calculate_nb_values_per_window_per_samples_list(patterns_static, feature_one, feature_two)
     # configuration_walking = calculate_nb_values_per_window_per_samples_list(patterns_walking)
     # configuration_biking = calculate_nb_values_per_window_per_samples_list(patterns_biking)
-    configuration_vehicle = calculate_nb_values_per_window_per_samples_list(patterns_vehicle)
+    configuration_vehicle = calculate_nb_values_per_window_per_samples_list(patterns_vehicle, feature_one, feature_two)
 
     configuration_walking = [[999, 999], [999, 999]]
     configuration_biking = [[555, 555], [555, 555]]
@@ -107,12 +110,16 @@ def produce_training_configuration(files_for_static, files_for_walking, files_fo
 
 
 if __name__ == '__main__':
-    files_for_static = ['data/static/static-samples-2017-09-21-183652-ui.csv']
+    # files_for_static = ['data/static/static-samples-2017-09-21-183652-ui.csv']
+    files_for_static = ['data/static/static-samples-2017-09-21-183652-ui-clean.csv']
     files_for_walking = []
     files_for_biking = []
-    files_for_vehicle = ['data/vehicle/vehicle-samples-2017-09-21-214800-ui.csv',
-                         'data/vehicle/vehicle-samples-2017-09-22-081037-ui.csv',
-                         'data/vehicle/vehicle-samples-2017-09-22-092518-ui.csv']
+    # files_for_vehicle = ['data/vehicle/vehicle-samples-2017-09-21-214800-ui.csv',
+    #                      'data/vehicle/vehicle-samples-2017-09-22-081037-ui.csv',
+    #                      'data/vehicle/vehicle-samples-2017-09-22-092518-ui.csv']
+    files_for_vehicle = ['data/vehicle/vehicle-samples-2017-09-21-214800-ui-clean.csv',
+                         'data/vehicle/vehicle-samples-2017-09-22-081037-ui-clean.csv',
+                         'data/vehicle/vehicle-samples-2017-09-22-092518-ui-clean.csv']
     # files_for_static = ['data/raw-static.csv']
     # files_for_walking = ['data/raw-walking.csv']
     # files_for_biking = ['data/raw-running.csv']

@@ -261,7 +261,8 @@ def plot_new_values(files, activity_labels, remove_gravity=True):
         samples = read_csv_acc_samples_file(file)
         if remove_gravity:
             filter_gravity(samples)
-            samples = samples[10:17500]
+            # samples = samples[10:17500]
+            samples = samples[2500:7500]
 
         mv = calculate_magnitude_vector(samples)
         mvs.append(mv)
@@ -273,12 +274,23 @@ def plot_new_values(files, activity_labels, remove_gravity=True):
     # plot_magnitude_vectors(mvs, activity_labels)
 
     # statistics_ids = ['std_dev', 'acc_range_size']
-    statistics_ids = ['std_dev', 'mean_with_mean']
-    plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids, activity_labels)
+    # statistics_ids = ['std_dev', 'mean_with_mean']
+    statistics_ids = ['std_dev', 'avg_max_range']
+    plot_statistics(stats, statistics_ids, activity_labels)
+    # plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids, activity_labels)
 
-    # statistics_ids = ['mean', 'acc_range_size']
-    statistics_ids = ['median', 'mean_with_mean']
-    plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids, activity_labels)
+    statistics_ids = ['mean', 'avg_range_size']
+    plot_statistics(stats, statistics_ids, activity_labels)
+    # statistics_ids = ['median', 'mean_with_mean']
+
+    statistics_ids = ['avg_range_size_with_mean', 'avg_max_range']
+    plot_statistics(stats, statistics_ids, activity_labels)
+
+    statistics_ids = ['avg_range_size_with_mean', 'mean']
+    plot_statistics(stats, statistics_ids, activity_labels)
+
+    statistics_ids = ['avg_range_size_with_mean', 'std_dev']
+    plot_statistics(stats, statistics_ids, activity_labels)
 
 
 def plot_portion_of_data(files, activity_labels, remove_gravity=True):
@@ -312,24 +324,25 @@ def calculate_global_statistics(files, remove_gravity=True):
 
         mv = calculate_magnitude_vector(samples)
         mean_value = np.mean(mv)
-        print('For {} mean is {}'.format(f, mean_value))
 
 
-def analyze_three_dimensions(files, activity_labels):
+def analyze_three_dimensions(files, activity_labels, remove_gravity):
     new_start = 20
     statistics = []
     i = 0
     for f in files:
         samples = read_csv_acc_samples_file(f)
-        filter_gravity(samples)
-        samples = samples[new_start:]
+
+        if remove_gravity:
+            filter_gravity(samples)
+            samples = samples[new_start:]
 
         normalize_time(samples)
         stats = get_statistics_per_window(samples, mean_to_add=means_are[i])
         statistics.append(stats)
         i += 1
 
-    attributes_to_plot = ['mean', 'std_dev', 'avg_range_size_with_mean']
+    attributes_to_plot = ['mean_with_mean', 'std_dev', 'avg_max_range']
     plot_three_dimensions(statistics, activity_labels, attributes_to_plot)
 
 
@@ -356,37 +369,61 @@ def magnitude_vectors_vs_alpha():
 
 means_are = [0.09792535164706333, 0.44263381696905124, 0.4642997219313103, 0.52316091488281]
 
+
+def show_magnitude_vectors_of_activities(files, labels, remove_gravity=True):
+    mvs = []
+    for file in files:
+        print('reading {}'.format(file))
+        samples = read_csv_acc_samples_file(file)
+        if remove_gravity:
+            filter_gravity(samples)
+            samples = samples[20:]
+            # samples = samples[2500:7500]
+
+        mv = calculate_magnitude_vector(samples)
+        mvs.append(mv)
+
+    plot_magnitude_vectors(mvs, labels)
+
+
 if __name__ == '__main__':
-    files = [
-        'c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv',
-        'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-21-214800-ui.csv',
-        'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-081037-ui.csv',
-        'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-092518-ui.csv',
-    ]
-    activity_labels = [
-        'static',
-        'vehicle',
-        'vehicle',
-        'vehicle'
-    ]
-
-    # calculate_global_statistics(files, remove_gravity=True)
-
     # files = [
-    #     'data/raw-static.csv',
-    #     'data/raw-walking.csv',
-    #     'data/raw-running.csv',
-    #     'data/raw-vehicle.csv'
+    #     'c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui-clean.csv',
+    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-21-214800-ui-clean.csv',
+    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-081037-ui-clean.csv',
+    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-092518-ui-clean.csv',
     # ]
-    #
+    # files = [
+    #     'c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv',
+    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-21-214800-ui.csv',
+    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-081037-ui.csv',
+    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-092518-ui.csv',
+    # ]
     # activity_labels = [
     #     'static',
-    #     'walking',
-    #     'running',
+    #     'vehicle',
+    #     'vehicle',
     #     'vehicle'
     # ]
 
-    plot_new_values(files, activity_labels, remove_gravity=True)
+    # calculate_global_statistics(files, remove_gravity=True)
+
+    files = [
+        'data/raw-static.csv',
+        'data/raw-walking.csv',
+        'data/raw-running.csv',
+        'data/raw-vehicle.csv'
+    ]
+
+    activity_labels = [
+        'static',
+        'walking',
+        'running',
+        'vehicle'
+    ]
+    # analyze_three_dimensions(files, activity_labels, remove_gravity=False)
+
+    plot_new_values(files, activity_labels, remove_gravity=False)
 
     # do_work()
     # different_filter_configurations()
@@ -395,7 +432,10 @@ if __name__ == '__main__':
 
     # plot_portion_of_data(files, activity_labels)
     # show_statistics_per_window(files)
-    # analyze_three_dimensions(files, activity_labels)
+    # analyze_three_dimensions(files, activity_labels, remove_gravity=True)
+
+    # show_magnitude_vectors_of_activities([files[3], files[0]], ['v', 's'], remove_gravity=True)
+    # show_magnitude_vectors_of_activities([files[1], files[0]], ['whateva', 'st'], remove_gravity=True)
     plt.show()
 
     # samples = read_csv_acc_samples_file(files[0])

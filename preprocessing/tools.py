@@ -6,6 +6,13 @@ import numpy as np
 from GravityFilterer import GravityFilterer
 from entities.AccelerometerSample import AccelerometerSample
 
+means = {
+    "static": 0.08646747846470636,
+    "walking": 3.379133914910735,
+    "biking": 999,
+    "vehicle": 0.5267873675845448,
+}
+
 
 def calculate_magnitude_vector(samples: List[AccelerometerSample]):
     vector = []

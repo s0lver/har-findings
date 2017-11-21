@@ -1,4 +1,7 @@
 from typing import List, Dict
+
+import numpy as np
+from brewer2mpl import brewer2mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
@@ -175,35 +178,47 @@ def plot_some_activities_data(samples_list, activities_string):
             shown_y_label = True
 
 
-def plot_statistics(statistics: List[List[Dict]], attributes_to_plot: List[str], actitivy_labels, path_to_save=None):
+def plot_statistics(statistics: List[List[Dict]], attributes_to_plot: List[str],
+                    axis_labels, activity_labels, path_to_save=None):
     plt.style.use('bmh')
 
     plt.rcParams['font.family'] = 'Gotham XNarrow'
     plt.rcParams['font.serif'] = 'Gotham XNarrow'
     plt.rcParams['font.monospace'] = 'Monaco'
     plt.rcParams['font.size'] = 10
-    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['axes.labelsize'] = 16
     plt.rcParams['axes.labelweight'] = 'normal'
-    plt.rcParams['axes.titlesize'] = 14
-    plt.rcParams['xtick.labelsize'] = 12
-    plt.rcParams['ytick.labelsize'] = 12
-    # plt.rcParams['legend.fontsize'] = 11
-    plt.rcParams['legend.fontsize'] = 9
+    plt.rcParams['axes.titlesize'] = 15
+    plt.rcParams['xtick.labelsize'] = 14
+    plt.rcParams['ytick.labelsize'] = 14
+    plt.rcParams['legend.fontsize'] = 12
     plt.rcParams['figure.titlesize'] = 14
 
-    fig = plt.figure()
+    # import matplotlib.cm as cm
+    # colors = cm.gist_ncar(np.linspace(0, 1, len(activity_labels)))
+
+    # Get "Set2" colors from ColorBrewer (all colorbrewer scales: http://bl.ocks.org/mbostock/5577023)
+    set2 = brewer2mpl.get_map('Set2', 'qualitative', 8).mpl_colors
+
+    width, height = plt.figaspect(9 / 16)
+    fig = plt.figure(figsize=(width, height))
+
     axis = fig.gca()
+    size = 60
 
     i = 0
+    my_alpha = 0.7
     for stats in statistics:
+        my_color = set2[i]
         xs = list(map(lambda x: x[attributes_to_plot[0]], stats))
         ys = list(map(lambda x: x[attributes_to_plot[1]], stats))
         # axis.scatter(x=xs, y=ys, label='Walking')
-        axis.scatter(x=xs, y=ys, label=actitivy_labels[i])
-        i+=1
+        # axis.scatter(x=xs, y=ys, label=activity_labels[i], color = colors[i])
+        axis.scatter(x=xs, y=ys, label=activity_labels[i], s=size, alpha=my_alpha, edgecolor='black', linewidth=0.15, facecolor=my_color)
+        i += 1
 
-    axis.set_xlabel(attributes_to_plot[0])
-    axis.set_ylabel(attributes_to_plot[1])
+    axis.set_xlabel(axis_labels[0])
+    axis.set_ylabel(axis_labels[1])
 
     axis.legend()
 

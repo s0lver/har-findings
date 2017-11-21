@@ -269,25 +269,14 @@ def plot_new_values(files, activity_labels, remove_gravity=True):
         i += 1
 
     # plot_magnitude_vectors(mvs, activity_labels)
-
-    # statistics_ids = ['std_dev', 'acc_range_size']
-    # statistics_ids = ['std_dev', 'mean_with_mean']
-    statistics_ids = ['mean_with_mean', 'avg_max_range']
-    plot_statistics(stats, statistics_ids, activity_labels)
-    # plot_statistics(stats[0], stats[1], stats[2], stats[3], statistics_ids, activity_labels)
-
-    statistics_ids = ['mean_with_mean', 'std_dev']
-    plot_statistics(stats, statistics_ids, activity_labels)
-    # statistics_ids = ['median', 'mean_with_mean']
-
-    # statistics_ids = ['avg_range_size_with_mean', 'avg_max_range']
+    # statistics_ids = ['mean_with_mean', 'avg_max_range']
     # plot_statistics(stats, statistics_ids, activity_labels)
     #
-    # statistics_ids = ['mean', 'avg_range_size_with_mean']
+    # statistics_ids = ['mean_with_mean', 'std_dev']
     # plot_statistics(stats, statistics_ids, activity_labels)
-    #
-    # statistics_ids = ['avg_range_size_with_mean', 'std_dev']
-    # plot_statistics(stats, statistics_ids, activity_labels)
+    statistics_ids = ['std_dev_with_mean', 'mean_with_mean']
+    plot_statistics(stats, statistics_ids, ['Standard deviation (+activity mean)', 'Mean (+activity mean)'],
+                    activity_labels, 'c:\\users\\lti\\desktop\\new-plot.pdf')
 
 
 def plot_portion_of_data(files, activity_labels, remove_gravity=True):
@@ -407,7 +396,7 @@ if __name__ == '__main__':
         'walking'
     ]
 
-    calculate_global_statistics(files, remove_gravity=True)
+    # calculate_global_statistics(files, remove_gravity=True)
 
     # files = [
     #     'data/raw-static.csv',
@@ -424,6 +413,24 @@ if __name__ == '__main__':
     # ]
     # analyze_three_dimensions(files, activity_labels, remove_gravity=False)
 
+    # TODO get the clean samples for the biking mode, then put them in a file
+    # TODO then obtain the representative mean (for thw with_mean calculations)
+    # And finally get insert such values on the files and activity_labels arrays
+    files = [
+        'data/static/static-samples-2017-09-21-183652-ui-clean.csv',
+        'data/walking/walking-samples-2017-09-30-101645-ui-clean.csv',
+        'data/raw-running.csv',
+        # 'data/vehicle/vehicle-samples-2017-09-22-092518-ui-clean.csv',
+        'data/vehicle/vehicle-samples-2017-09-21-214800-ui-clean.csv',
+    ]
+    activity_labels = [
+        'Static',
+        'Walking',
+        'Running',
+        'Vehicle'
+        # 'vehicle',
+    ]
+    # calculate_global_statistics(files, remove_gravity=True)
     plot_new_values(files, activity_labels, remove_gravity=False)
 
     # do_work()

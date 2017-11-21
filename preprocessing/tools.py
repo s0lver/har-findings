@@ -7,10 +7,10 @@ from GravityFilterer import GravityFilterer
 from entities.AccelerometerSample import AccelerometerSample
 
 means = {
-    "static": 0.08646747846470636,
-    "walking": 3.379133914910735,
-    "biking": 999,
-    "vehicle": 0.5267873675845448,
+    "Static": 0.08646747846470636,
+    "Walking": 3.379133914910735,
+    "Running": 14.13775140024083,
+    "Vehicle": 0.5267873675845448,
 }
 
 
@@ -126,6 +126,7 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], m
         mean_with_mean = mean + mean_to_add
         average_range_size_with_mean = average_range_size + mean_to_add
         std_dev = my_std_dev(mv, mean)
+        std_dev_with_mean = std_dev + mean_to_add
         median_value = np.median(mv)
         crossings = calculate_zero_crossings(samples_of_window, mean)
 
@@ -134,6 +135,7 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], m
             "mean": mean,
             "mean_with_mean": mean_with_mean,
             "std_dev": std_dev,
+            "std_dev_with_mean": std_dev_with_mean,
             "median": median_value,
             "signal_magnitude_area": signal_magnitude_area,
             "crossings_x": crossings["crossings_x"],

@@ -191,7 +191,7 @@ def plot_statistics(statistics: List[List[Dict]], attributes_to_plot: List[str],
     plt.rcParams['axes.titlesize'] = 15
     plt.rcParams['xtick.labelsize'] = 14
     plt.rcParams['ytick.labelsize'] = 14
-    plt.rcParams['legend.fontsize'] = 12
+    plt.rcParams['legend.fontsize'] = 13
     plt.rcParams['figure.titlesize'] = 14
 
     # import matplotlib.cm as cm
@@ -201,10 +201,10 @@ def plot_statistics(statistics: List[List[Dict]], attributes_to_plot: List[str],
     set2 = brewer2mpl.get_map('Set2', 'qualitative', 8).mpl_colors
 
     width, height = plt.figaspect(9 / 16)
-    fig = plt.figure(figsize=(width, height))
+    fig = plt.figure(figsize=(7.5, 3.5))
 
     axis = fig.gca()
-    size = 60
+    size = 75
 
     i = 0
     my_alpha = 0.7

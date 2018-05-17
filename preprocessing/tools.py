@@ -9,7 +9,8 @@ from entities.AccelerometerSample import AccelerometerSample
 means = {
     "Static": 0.08646747846470636,
     "Walking": 3.379133914910735,
-    "Running": 14.13775140024083,
+    # "Running": 14.13775140024083,
+    'Biking': 2.5962405336815433,
     "Vehicle": 0.5267873675845448,
 }
 
@@ -103,6 +104,13 @@ def get_average_max_range(ranges):
     return acc_sum / float(len(ranges))
 
 
+def add_to_vector(the_vector, value: float):
+    new_vector = []
+    for x in the_vector:
+        new_vector.append(x + value)
+    return new_vector
+
+
 def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], mean_to_add=0.0):
     statistics = []
 
@@ -115,6 +123,7 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], m
         samples_of_window = list(filter(lambda x: x.id_window == id_window, gravity_free_samples))
 
         mv = np.array(calculate_magnitude_vector(samples_of_window))
+        mv_of_tmode = add_to_vector(mv, mean_to_add)
 
         # Calculate each of the attributes, gravity has been already filtered
         signal_magnitude_area = sum(mv)
@@ -123,19 +132,21 @@ def get_statistics_per_window(gravity_free_samples: List[AccelerometerSample], m
         accumulated_range_size = get_accumulated_range_size(ranges)
         average_max_range = get_average_max_range(ranges)
         mean = my_mean(mv)
-        mean_with_mean = mean + mean_to_add
+        # mean_with_mean = mean + mean_to_add
+        mean_of_mv_of_tmode = my_mean(mv_of_tmode)
         average_range_size_with_mean = average_range_size + mean_to_add
         std_dev = my_std_dev(mv, mean)
-        std_dev_with_mean = std_dev + mean_to_add
+        # std_dev_with_mean = std_dev + mean_to_add
+        std_dev_of_mv_of_tmode = my_std_dev(mv_of_tmode, mean_of_mv_of_tmode)
         median_value = np.median(mv)
         crossings = calculate_zero_crossings(samples_of_window, mean)
 
         sum_crossings = crossings["crossings_x"] + crossings["crossings_y"] + crossings["crossings_z"]
         d = {
             "mean": mean,
-            "mean_with_mean": mean_with_mean,
+            "mean_with_mean": mean_of_mv_of_tmode,
             "std_dev": std_dev,
-            "std_dev_with_mean": std_dev_with_mean,
+            "std_dev_with_mean": std_dev_of_mv_of_tmode,
             "median": median_value,
             "signal_magnitude_area": signal_magnitude_area,
             "crossings_x": crossings["crossings_x"],

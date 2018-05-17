@@ -154,7 +154,6 @@ def do_work():
     # plot_magnitude_vectors([mv_static, mv_walking, mv_running, mv_vehicle], ['Static', 'Walking', 'Running', 'Vehicle'])
     # plt.show()
 
-
     # samples_static = read_csv_acc_samples_file('data/raw-static.csv')
     # samples_walking = read_csv_acc_samples_file('data/raw-walking.csv')
     # samples_running = read_csv_acc_samples_file('data/raw-running.csv')
@@ -261,8 +260,8 @@ def plot_new_values(files, activity_labels, remove_gravity=True):
             samples = samples[new_start:]
             # samples = samples[2500:7500]
 
-        mv = calculate_magnitude_vector(samples)
-        mvs.append(mv)
+        # mv = calculate_magnitude_vector(samples)
+        # mvs.append(mv)
 
         stat = get_statistics_per_window(samples, mean_to_add=means[activity_labels[i]])
         stats.append(stat)
@@ -275,8 +274,8 @@ def plot_new_values(files, activity_labels, remove_gravity=True):
     # statistics_ids = ['mean_with_mean', 'std_dev']
     # plot_statistics(stats, statistics_ids, activity_labels)
     statistics_ids = ['std_dev_with_mean', 'mean_with_mean']
-    plot_statistics(stats, statistics_ids, ['Standard deviation (+activity mean)', 'Mean (+activity mean)'],
-                    activity_labels, 'c:\\users\\lti\\desktop\\new-plot.pdf')
+    plot_statistics(stats, statistics_ids, ['Standard deviation (+transportation mode mean)', 'Mean (+transportation mode mean)'],
+                    activity_labels, 'c:\\users\\rafael\\desktop\\new-plot.pdf')
 
 
 def plot_portion_of_data(files, activity_labels, remove_gravity=True):
@@ -374,30 +373,6 @@ def show_magnitude_vectors_of_activities(files, labels, remove_gravity=True):
 new_start = 20
 
 if __name__ == '__main__':
-    files = [
-        'data/static/static-samples-2017-09-21-183652-ui-clean.csv',
-        'data/vehicle/vehicle-samples-2017-09-21-214800-ui-clean.csv',
-        'data/vehicle/vehicle-samples-2017-09-22-081037-ui-clean.csv',
-        'data/vehicle/vehicle-samples-2017-09-22-092518-ui-clean.csv',
-        'data/walking/walking-samples-2017-09-30-101645-ui-clean.csv'
-    ]
-
-    # files = [
-    #     'c:\\users/rafael/desktop/static/static-samples-2017-09-21-183652-ui.csv',
-    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-21-214800-ui.csv',
-    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-081037-ui.csv',
-    #     'c:\\users/rafael/desktop/vehicle/focus-guindo/vehicle-samples-2017-09-22-092518-ui.csv',
-    # ]
-    activity_labels = [
-        'static',
-        'vehicle',
-        'vehicle',
-        'vehicle',
-        'walking'
-    ]
-
-    # calculate_global_statistics(files, remove_gravity=True)
-
     # files = [
     #     'data/raw-static.csv',
     #     'data/raw-walking.csv',
@@ -419,19 +394,26 @@ if __name__ == '__main__':
     files = [
         'data/static/static-samples-2017-09-21-183652-ui-clean.csv',
         'data/walking/walking-samples-2017-09-30-101645-ui-clean.csv',
-        'data/raw-running.csv',
-        # 'data/vehicle/vehicle-samples-2017-09-22-092518-ui-clean.csv',
+        # 'data/raw-running.csv',
+        # 'data/biking/biking-samples-2018-05-17-092006-ui-clean.csv',
+        #'data/biking/biking-samples-2018-05-17-092341-ui-clean.csv',
+        'data/biking/biking-samples-2018-05-17-092755-ui-clean.csv', #IT IS CONSISTENT BETWEEN DIFF BIKING FILES
         'data/vehicle/vehicle-samples-2017-09-21-214800-ui-clean.csv',
     ]
     activity_labels = [
         'Static',
         'Walking',
-        'Running',
+        # 'Running',
+        'Biking',
         'Vehicle'
-        # 'vehicle',
     ]
     # calculate_global_statistics(files, remove_gravity=True)
+    # this is for plotting new selected features:
     plot_new_values(files, activity_labels, remove_gravity=False)
+    plt.show()
+
+    # The following code was for investigating the best features, but it was concluded that the activity mean
+    # should be added for achieving class separation
 
     # do_work()
     # different_filter_configurations()
@@ -444,7 +426,6 @@ if __name__ == '__main__':
 
     # show_magnitude_vectors_of_activities([files[4], files[0]], ['w', 's'], remove_gravity=True)
     # show_magnitude_vectors_of_activities([files[1], files[0]], ['whateva', 'st'], remove_gravity=True)
-    plt.show()
 
     # samples = read_csv_acc_samples_file(files[0])
     # filter_gravity(samples)
